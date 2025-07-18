@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Homicide Counter (India)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --accent-red: #ff4757;
+            --accent-blue: #3742fa;
+            --accent-green: #2ed573;
+            --accent-orange: #ffa502;
+            --border-color: #333333;
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        [data-theme="light"] {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --text-muted: #7f8c8d;
+            --border-color: #e9ecef;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .year-progress {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .progress-percentage {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .progress-bar-container {
+            height: 12px;
+            background: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .time-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .time-stat {
+            text-align: center;
+            padding: 15px;
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .time-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .time-stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .counters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .counter-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .counter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+        }
+
+        .counter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .counter-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .counter-label {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .counter-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--accent-red);
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+        }
+
+        .counter-rate {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .stats-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            padding: 20px;
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-orange);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .theme-toggle {
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .counters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .counter-card {
+                padding: 30px 20px;
+            }
+            
+            .counter-number {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="background-pattern"></div>
+    
+    <div class="container">
+        <header>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">Dark</span>
+            </button>
+            
+            <h1 class="main-title">Live Crime Statistics</h1>
+            <p class="subtitle">🇮🇳 India - Domestic Violence Tracker 2025</p>
+        </header>
+
+        <div class="year-progress">
+            <div class="progress-header">
+                <div class="progress-title">Year Progress</div>
+                <div class="progress-percentage" id="yearProgress">0%</div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="time-stats">
+                <div class="time-stat">
+                    <div class="time-stat-value" id="daysElapsed">0</div>
+                    <div class="time-stat-label">Days Elapsed</div>
+                </div>
+                <div class="time-stat">
+                    <div class="time-stat-value" id="daysRemaining">0</div>
+                    <div class="time-stat-label">Days Remaining</div>
+                </div>
+                <div class="time-stat">
+                    <div class="time-stat-value" id="hoursElapsed">0</div>
+                    <div class="time-stat-label">Hours Elapsed</div>
+                </div>
+                <div class="time-stat">
+                    <div class="time-stat-value" id="hoursRemaining">0</div>
+                    <div class="time-stat-label">Hours Remaining</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="counters-grid">
+            <div class="counter-card">
+                <span class="counter-icon">👨‍💼</span>
+                <div class="counter-label">Husbands Killed by Wives</div>
+                <div class="counter-number pulse" id="husbandCount">0</div>
+                <div class="counter-rate">Based on projected annual rate</div>
+            </div>
+            
+            <div class="counter-card">
+                <span class="counter-icon">👩‍💼</span>
+                <div class="counter-label">Wives Killed by Husbands</div>
+                <div class="counter-number pulse" id="wifeCount">0</div>
+                <div class="counter-rate">Based on projected annual rate</div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h2 class="stats-title">📊 Additional Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCases">0</div>
+                    <div class="stat-label">Total Cases This Year</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="dailyAverage">0</div>
+                    <div class="stat-label">Daily Average</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="hourlyRate">0</div>
+                    <div class="stat-label">Hourly Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="projectedTotal">3,785</div>
+                    <div class="stat-label">Projected Annual Total</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Data Source:</strong> Estimates based on projected Indian crime statistics for 2025.</p>
+            <p>This counter automatically resets each year on January 1st.</p>
+            <p><em>Note: These are statistical projections and may not reflect actual real-time data.</em></p>
+        </footer>
+    </div>
+
+    <script>
+        // Yearly total estimates
+        const YEARLY_HUSBANDS_KILLED = 785;
+        const YEARLY_WIVES_KILLED = 3000;
+        const TOTAL_YEARLY_CASES = YEARLY_HUSBANDS_KILLED + YEARLY_WIVES_KILLED;
+
+        // Theme management
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+            }
+        }
+
+        // Check for leap year
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-IN').format(num);
+        }
+
+        function updateCounters() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const startOfYear = new Date(year, 0, 1);
+            const endOfYear = new Date(year + 1, 0, 1);
+            
+            const msElapsed = now - startOfYear;
+            const totalMsInYear = isLeapYear(year) ? 366 * 24 * 60 * 60 * 1000 : 365 * 24 * 60 * 60 * 1000;
+            const msRemaining = endOfYear - now;
+            
+            // Calculate progress
+            const progressPercent = (msElapsed / totalMsInYear) * 100;
+            
+            // Calculate time statistics
+            const daysElapsed = Math.floor(msElapsed / (24 * 60 * 60 * 1000));
+            const daysRemaining = Math.floor(msRemaining / (24 * 60 * 60 * 1000));
+            const hoursElapsed = Math.floor(msElapsed / (60 * 60 * 1000));
+            const hoursRemaining = Math.floor(msRemaining / (60 * 60 * 1000));
+            
+            // Calculate counts
+            const husbandCount = Math.floor((msElapsed / totalMsInYear) * YEARLY_HUSBANDS_KILLED);
+            const wifeCount = Math.floor((msElapsed / totalMsInYear) * YEARLY_WIVES_KILLED);
+            const totalCases = husbandCount + wifeCount;
+            
+            // Calculate rates
+            const dailyAverage = Math.round((TOTAL_YEARLY_CASES / (isLeapYear(year) ? 366 : 365)) * 100) / 100;
+            const hourlyRate = Math.round((TOTAL_YEARLY_CASES / (isLeapYear(year) ? 366 : 365) / 24) * 100) / 100;
+            
+            // Update DOM elements
+            document.getElementById('yearProgress').textContent = progressPercent.toFixed(1) + '%';
+            document.getElementById('progressBar').style.width = progressPercent + '%';
+            
+            document.getElementById('daysElapsed').textContent = formatNumber(daysElapsed);
+            document.getElementById('daysRemaining').textContent = formatNumber(daysRemaining);
+            document.getElementById('hoursElapsed').textContent = formatNumber(hoursElapsed);
+            document.getElementById('hoursRemaining').textContent = formatNumber(hoursRemaining);
+            
+            document.getElementById('husbandCount').textContent = formatNumber(husbandCount);
+            document.getElementById('wifeCount').textContent = formatNumber(wifeCount);
+            
+            document.getElementById('totalCases').textContent = formatNumber(totalCases);
+            document.getElementById('dailyAverage').textContent = dailyAverage;
+            document.getElementById('hourlyRate').textContent = hourlyRate;
+        }
+
+        // Initialize and update every second
+        updateCounters();
+        setInterval(updateCounters, 1000);
+    </script>
+</body>
+</html>
