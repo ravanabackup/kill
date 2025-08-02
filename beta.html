@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -437,49 +438,51 @@
         }
 
         // Fast counter animation for main counter
-        function animateMainCounter(targetNumber) {
-            const element = document.getElementById('mainCounter');
-            const currentNumber = parseInt(element.textContent.replace(/,/g, '')) || 0;
-            
-            if (mainCounterAnimation) {
-                clearInterval(mainCounterAnimation);
-            }
-            
-            if (currentNumber === targetNumber) return;
-            
-            const difference = targetNumber - currentNumber;
-            const steps = isInitialLoad ? 60 : 30; // Faster initial load, then slower updates
-            const increment = Math.ceil(Math.abs(difference) / steps);
-            const stepDelay = isInitialLoad ? 50 : 100; // Faster steps initially
-            
-            let current = currentNumber;
-            
-            mainCounterAnimation = setInterval(() => {
-                if (current < targetNumber) {
-                    current = Math.min(current + increment, targetNumber);
-                } else {
-                    current = Math.max(current - increment, targetNumber);
-                }
-                
-                element.textContent = current.toLocaleString();
-                
-                if (current === targetNumber) {
-                    clearInterval(mainCounterAnimation);
-                    mainCounterAnimation = null;
-                    
-                    if (isInitialLoad) {
-                        document.getElementById('loadingIndicator').style.display = 'none';
-                        isInitialLoad = false;
-                    }
-                    
-                    // Highlight if this is an update (not initial load)
-                    if (previousValues.mainCounter !== targetNumber && !isInitialLoad) {
-                        highlightElement(element, true);
-                    }
-                    previousValues.mainCounter = targetNumber;
-                }
-            }, stepDelay);
+function animateMainCounter(targetNumber) {
+    const element = document.getElementById('mainCounter');
+    const currentNumber = parseInt(element.textContent.replace(/,/g, '')) || 0;
+
+    if (mainCounterAnimation) {
+        clearInterval(mainCounterAnimation);
+    }
+
+    if (currentNumber === targetNumber) return;
+
+    const difference = targetNumber - currentNumber;
+    // Lower these values to make the animation faster
+    const steps = isInitialLoad ? 30 : 15; // Decreased from 60 and 30
+    const increment = Math.ceil(Math.abs(difference) / steps);
+    // Lower these values to make the animation faster
+    const stepDelay = isInitialLoad ? 20 : 40; // Decreased from 50 and 100
+
+    let current = currentNumber;
+
+    mainCounterAnimation = setInterval(() => {
+        if (current < targetNumber) {
+            current = Math.min(current + increment, targetNumber);
+        } else {
+            current = Math.max(current - increment, targetNumber);
         }
+
+        element.textContent = current.toLocaleString();
+
+        if (current === targetNumber) {
+            clearInterval(mainCounterAnimation);
+            mainCounterAnimation = null;
+
+            if (isInitialLoad) {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                isInitialLoad = false;
+            }
+
+            // Highlight if this is an update (not initial load)
+            if (previousValues.mainCounter !== targetNumber && !isInitialLoad) {
+                highlightElement(element, true);
+            }
+            previousValues.mainCounter = targetNumber;
+        }
+    }, stepDelay);
+}
 
         // Updates a number and animates it if it changes (for smaller numbers)
         function updateNumberWithAnimation(elementId, targetNumber, isMainCounter = false) {
