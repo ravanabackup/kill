@@ -247,6 +247,14 @@
             box-shadow: 0 6px 20px rgba(179, 38, 30, 0.4);
         }
 
+        .loading-indicator {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9em;
+            opacity: 0.7;
+            animation: blink 1s infinite;
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -281,6 +289,11 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 0.7; }
+            51%, 100% { opacity: 0.3; }
         }
 
         @media (max-width: 768px) {
@@ -322,11 +335,10 @@
         </div>
 
         <div class="card main-counter">
+            <div id="loadingIndicator" class="loading-indicator">Calculating current estimate...</div>
             <div class="counter-number" id="mainCounter">0</div>
             <div class="counter-label">Estimated Total Cases in <span class="year-label">2025</span></div>
-            <div style="font-size: 0.9em; opacity: 0.8; color: var(--color-on-surface);">
-                Based on a 9.62% annual growth rate from NCRB data
-            </div>
+            <div style="font-size: 0.9em; opacity: 0.8;">Based on a 9.62% annual growth rate from NCRB data</div>
         </div>
 
         <div class="stats-grid">
@@ -348,15 +360,13 @@
             </div>
         </div>
 
-        <div class="card breakdown">
-            <h2>Estimated Breakdown by Crime Type (<span class="year-label">2025</span>)</h2>
+        <div class="card">
+            <h2>Estimated Breakdown by Crime Type (2025)</h2>
             <ul class="breakdown-list" id="crimeBreakdown"></ul>
         </div>
 
         <div class="disclaimer">
-            <strong>Disclaimer:</strong> These numbers are statistical projections based on NCRB data trends (2020-2022) 
-            and should not be considered as actual real-time crime data. The actual figures may vary significantly. 
-            This counter is created for awareness purposes only. Official data for 2023-<span class="year-label">2025</span> is not yet available from NCRB.
+            <strong>Disclaimer:</strong> These numbers are projections based on NCRB trends (2020–2022) and may not reflect real-time data. This counter is for awareness purposes only.
         </div>
     </div>
 
@@ -384,13 +394,13 @@
             { name: "Cruelty by Husband/Relatives (498A)", percent: 31.4 },
             { name: "Kidnapping & Abduction of Women", percent: 19.2 },
             { name: "Assault with Intent to Outrage Modesty", percent: 18.7 },
-            { name: "Rape", percent: 7.1 },
             { name: "POCSO Act (Child Sexual Offences)", percent: 13.9 },
+            { name: "Rape", percent: 7.1 },
+            { name: "Dowry Prohibition Act", percent: 3.0 },
             { name: "Insult to Modesty of Women", percent: 2.0 },
             { name: "Dowry Deaths", percent: 1.4 },
             { name: "Abetment to Suicide of Women", percent: 1.1 },
             { name: "Attempt to Commit Rape", percent: 0.7 },
-            { name: "Dowry Prohibition Act", percent: 3.0 },
             { name: "Cyber Crimes / IT Act", percent: 0.7 }
         ];
 
@@ -403,6 +413,10 @@
             daysElapsed: 0,
             crimeBreakdown: {}
         };
+
+        // Animation state management
+        let isInitialLoad = true;
+        let mainCounterAnimation = null;
         
         function isLeapYear(year) {
             return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
@@ -422,18 +436,68 @@
             }, 1000);
         }
 
-        // Updates a number and animates it if it changes
+        // Fast counter animation for main counter
+        function animateMainCounter(targetNumber) {
+            const element = document.getElementById('mainCounter');
+            const currentNumber = parseInt(element.textContent.replace(/,/g, '')) || 0;
+            
+            if (mainCounterAnimation) {
+                clearInterval(mainCounterAnimation);
+            }
+            
+            if (currentNumber === targetNumber) return;
+            
+            const difference = targetNumber - currentNumber;
+            const steps = isInitialLoad ? 60 : 30; // Faster initial load, then slower updates
+            const increment = Math.ceil(Math.abs(difference) / steps);
+            const stepDelay = isInitialLoad ? 50 : 100; // Faster steps initially
+            
+            let current = currentNumber;
+            
+            mainCounterAnimation = setInterval(() => {
+                if (current < targetNumber) {
+                    current = Math.min(current + increment, targetNumber);
+                } else {
+                    current = Math.max(current - increment, targetNumber);
+                }
+                
+                element.textContent = current.toLocaleString();
+                
+                if (current === targetNumber) {
+                    clearInterval(mainCounterAnimation);
+                    mainCounterAnimation = null;
+                    
+                    if (isInitialLoad) {
+                        document.getElementById('loadingIndicator').style.display = 'none';
+                        isInitialLoad = false;
+                    }
+                    
+                    // Highlight if this is an update (not initial load)
+                    if (previousValues.mainCounter !== targetNumber && !isInitialLoad) {
+                        highlightElement(element, true);
+                    }
+                    previousValues.mainCounter = targetNumber;
+                }
+            }, stepDelay);
+        }
+
+        // Updates a number and animates it if it changes (for smaller numbers)
         function updateNumberWithAnimation(elementId, targetNumber, isMainCounter = false) {
+            if (isMainCounter) {
+                animateMainCounter(targetNumber);
+                return;
+            }
+            
             const element = document.getElementById(elementId);
             const currentNumber = parseInt(element.textContent.replace(/,/g, '')) || 0;
             
             if (currentNumber !== targetNumber) {
                 if (previousValues[elementId] !== targetNumber) {
-                    highlightElement(element, isMainCounter);
+                    highlightElement(element, false);
                     previousValues[elementId] = targetNumber;
                 }
                 
-                const increment = Math.ceil(Math.abs(targetNumber - currentNumber) / 20);
+                const increment = Math.ceil(Math.abs(targetNumber - currentNumber) / 10);
                 
                 function animate() {
                     let newValue;
@@ -456,12 +520,17 @@
             const element = document.getElementById(elementId);
             const currentNumber = parseFloat(element.textContent.replace(/,/g, '')) || 0;
             
-            if (currentNumber !== targetNumber) {
-                if (previousValues[elementId] !== targetNumber) {
+            if (Math.abs(currentNumber - targetNumber) > 0.01) {
+                if (Math.abs(previousValues[elementId] - targetNumber) > 0.01) {
                     highlightElement(element);
                     previousValues[elementId] = targetNumber;
                 }
-                element.textContent = targetNumber.toLocaleString();
+                
+                if (targetNumber % 1 === 0) {
+                    element.textContent = targetNumber.toLocaleString();
+                } else {
+                    element.textContent = targetNumber.toFixed(1);
+                }
             }
         }
 
@@ -475,8 +544,10 @@
                     
                     if (displayedCount !== currentCount) {
                         const crimeKey = `crime-${index}`;
-                        if (previousValues.crimeBreakdown[crimeKey] !== currentCount) {
-                            highlightElement(crimeCountElement);
+                        if (Math.abs(previousValues.crimeBreakdown[crimeKey] - currentCount) > 0) {
+                            if (!isInitialLoad) {
+                                highlightElement(crimeCountElement);
+                            }
                             previousValues.crimeBreakdown[crimeKey] = currentCount;
                         }
                         crimeCountElement.textContent = currentCount.toLocaleString();
@@ -493,9 +564,9 @@
             const millisecondsInYear = totalDaysInYear * 24 * 60 * 60 * 1000;
             
             const elapsed = now - startOfYear;
-            const progress = elapsed / millisecondsInYear;
+            const progress = Math.min(Math.max(elapsed / millisecondsInYear, 0), 1);
             
-            const progressPercent = Math.min(progress * 100, 100);
+            const progressPercent = progress * 100;
             document.getElementById('progressFill').style.width = progressPercent + '%';
             document.getElementById('progressText').textContent = progressPercent.toFixed(2) + '% of year completed';
             
@@ -514,7 +585,7 @@
             
             const dailyRate = Math.round(projectedCurrentYearTotal / totalDaysInYear);
             const hourlyRate = Math.round(dailyRate / 24);
-            const minuteRate = (dailyRate / (24 * 60)).toFixed(1);
+            const minuteRate = (dailyRate / (24 * 60));
             const daysElapsed = Math.floor(elapsed / (24 * 60 * 60 * 1000));
             
             updateStaticNumber('dailyRate', dailyRate);
@@ -542,12 +613,29 @@
             });
         }
 
+        // Catch up function for initial load
+        function initialCatchUp() {
+            // Fast initial update to get to current values quickly
+            setTimeout(() => {
+                updateAllCounters();
+            }, 100);
+        }
+
         // Initialize the page
         setupCrimeBreakdown();
-        updateAllCounters();
+        initialCatchUp();
         
-        // Update every second
+        // Update every second after initial load
         setInterval(updateAllCounters, 1000);
+        
+        // More frequent updates in the first few seconds to catch up faster
+        const fastUpdateInterval = setInterval(() => {
+            if (!isInitialLoad) {
+                clearInterval(fastUpdateInterval);
+            } else {
+                updateAllCounters();
+            }
+        }, 200);
     </script>
 </body>
 </html>
