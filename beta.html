@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Crimes Against Women - Live Counter 2025</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #6750A4;
+            --color-secondary: #B19CD9;
+            --color-tertiary: #E8DEF8;
+            --color-on-primary: #ffffff;
+            --color-on-surface: #1C1B1F;
+            --color-surface-container-high: #E6E0E9;
+            --color-surface-container-low: #F7F2FA;
+            --color-error: #B3261E;
+            --color-error-container: #F9DEDC;
+            --color-on-error: #FFFFFF;
+            --shape-corner-extra-large: 28px;
+            --shape-corner-large: 16px;
+            --shape-corner-medium: 12px;
+            --shape-corner-small: 8px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            min-height: 100vh;
+            color: var(--color-on-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.4, 1);
+        }
+
+        .header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(2em, 5vw, 3.5em);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 800;
+        }
+
+        .header p {
+            font-size: clamp(0.9em, 2vw, 1.2em);
+            opacity: 0.9;
+        }
+
+        .card {
+            background-color: var(--color-surface-container-high);
+            color: var(--color-on-surface);
+            border-radius: var(--shape-corner-extra-large);
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.4, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.4, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .main-counter {
+            text-align: center;
+            padding: 50px;
+            animation: slideInRight 1s cubic-bezier(0.2, 0.8, 0.4, 1);
+            background-color: var(--color-tertiary);
+            color: var(--color-primary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-counter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .counter-number {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(3em, 8vw, 6em);
+            font-weight: bold;
+            color: var(--color-primary);
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+            animation: pulse 2s infinite cubic-bezier(0.2, 0.8, 0.4, 1);
+            transition: all 0.3s ease;
+        }
+
+        .counter-label {
+            font-size: clamp(1em, 2.5vw, 1.5em);
+            font-weight: 600;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.4, 1);
+        }
+        
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .stat-number {
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            font-weight: 700;
+            color: var(--color-primary);
+            transition: all 0.3s ease;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .breakdown-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .crime-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(28, 27, 31, 0.1);
+        }
+
+        .crime-item:last-child {
+            border-bottom: none;
+        }
+
+        .crime-name {
+            flex: 1;
+            font-weight: 400;
+        }
+
+        .crime-count {
+            font-weight: 600;
+            color: var(--color-error);
+            font-size: 1.1em;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background-color: var(--color-surface-container-low);
+            border-radius: var(--shape-corner-large);
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-error), var(--color-primary));
+            border-radius: var(--shape-corner-large);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.8em;
+            color: var(--color-on-surface);
+            opacity: 0.7;
+        }
+        
+        .disclaimer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: var(--color-surface-container-high);
+            color: var(--color-on-surface);
+            border-radius: var(--shape-corner-large);
+            font-size: 0.8em;
+            opacity: 0.8;
+            animation: fadeIn 2s cubic-bezier(0.2, 0.8, 0.4, 1);
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8em;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--color-on-surface);
+        }
+
+        /* HIGHLIGHTING CSS */
+        .highlight {
+            background-color: var(--color-primary) !important;
+            color: var(--color-on-primary) !important;
+            padding: 4px 12px;
+            border-radius: var(--shape-corner-medium);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
+        }
+
+        .highlight-main {
+            background-color: var(--color-error) !important;
+            color: var(--color-on-error) !important;
+            padding: 8px 16px;
+            border-radius: var(--shape-corner-large);
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(179, 38, 30, 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .counter-number {
+                font-size: 4em;
+            }
+
+            .main-counter {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Crimes Against Women in India</h1>
+            <p>Live Counter for <span id="dynamicYear" class="year-label">2025</span></p>
+            <p style="margin-top: 5px;">Based on NCRB Data Trends (2020-2022)</p>
+        </div>
+
+        <div class="card progress-container">
+            <h2>Year Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span>Jan 1, <span class="year-label">2025</span></span>
+                <span id="currentDate"></span>
+                <span>Dec 31, <span class="year-label">2025</span></span>
+            </div>
+            <div style="text-align: center; margin-top: 10px; font-weight: 600; font-size: 1em;">
+                <strong id="progressText">0% of year completed</strong>
+            </div>
+        </div>
+
+        <div class="card main-counter">
+            <div class="counter-number" id="mainCounter">0</div>
+            <div class="counter-label">Estimated Total Cases in <span class="year-label">2025</span></div>
+            <div style="font-size: 0.9em; opacity: 0.8; color: var(--color-on-surface);">
+                Based on a 9.62% annual growth rate from NCRB data
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="card stat-card">
+                <div class="stat-number" id="dailyRate">0</div>
+                <div class="stat-label">Cases per Day</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-number" id="hourlyRate">0</div>
+                <div class="stat-label">Cases per Hour</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-number" id="minuteRate">0</div>
+                <div class="stat-label">Cases per Minute</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-number" id="daysElapsed">0</div>
+                <div class="stat-label">Days Elapsed</div>
+            </div>
+        </div>
+
+        <div class="card breakdown">
+            <h2>Estimated Breakdown by Crime Type (<span class="year-label">2025</span>)</h2>
+            <ul class="breakdown-list" id="crimeBreakdown"></ul>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Disclaimer:</strong> These numbers are statistical projections based on NCRB data trends (2020-2022) 
+            and should not be considered as actual real-time crime data. The actual figures may vary significantly. 
+            This counter is created for awareness purposes only. Official data for 2023-<span class="year-label">2025</span> is not yet available from NCRB.
+        </div>
+    </div>
+
+    <script>
+        // Crime data and projections based on NCRB 2020-2022 trends
+        const crimeData = {
+            2020: 371503,
+            2021: 428278,
+            2022: 445256
+        };
+
+        const currentYear = new Date().getFullYear();
+
+        // Calculate growth rate (average of 2020-2021 and 2021-2022)
+        const growthRate2021 = (crimeData[2021] - crimeData[2020]) / crimeData[2020];
+        const growthRate2022 = (crimeData[2022] - crimeData[2021]) / crimeData[2021];
+        const avgCrimeGrowthRate = (growthRate2021 + growthRate2022) / 2;
+
+        // Project crime data for the current year
+        const yearsFromBase = currentYear - 2022;
+        const projectedCurrentYearTotal = Math.round(crimeData[2022] * Math.pow(1 + avgCrimeGrowthRate, yearsFromBase));
+
+        // Crime breakdown percentages based on 2022 NCRB data
+        const crimeBreakdown = [
+            { name: "Cruelty by Husband/Relatives (498A)", percent: 31.4 },
+            { name: "Kidnapping & Abduction of Women", percent: 19.2 },
+            { name: "Assault with Intent to Outrage Modesty", percent: 18.7 },
+            { name: "Rape", percent: 7.1 },
+            { name: "POCSO Act (Child Sexual Offences)", percent: 13.9 },
+            { name: "Insult to Modesty of Women", percent: 2.0 },
+            { name: "Dowry Deaths", percent: 1.4 },
+            { name: "Abetment to Suicide of Women", percent: 1.1 },
+            { name: "Attempt to Commit Rape", percent: 0.7 },
+            { name: "Dowry Prohibition Act", percent: 3.0 },
+            { name: "Cyber Crimes / IT Act", percent: 0.7 }
+        ];
+
+        // Store previous values for comparison to trigger highlights
+        const previousValues = {
+            mainCounter: 0,
+            dailyRate: 0,
+            hourlyRate: 0,
+            minuteRate: 0,
+            daysElapsed: 0,
+            crimeBreakdown: {}
+        };
+        
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        function getDaysInYear(year) {
+            return isLeapYear(year) ? 366 : 365;
+        }
+
+        // Handles the highlighting effect
+        function highlightElement(element, isMainCounter = false) {
+            const highlightClass = isMainCounter ? 'highlight-main' : 'highlight';
+            element.classList.add(highlightClass);
+            
+            setTimeout(() => {
+                element.classList.remove(highlightClass);
+            }, 1000);
+        }
+
+        // Updates a number and animates it if it changes
+        function updateNumberWithAnimation(elementId, targetNumber, isMainCounter = false) {
+            const element = document.getElementById(elementId);
+            const currentNumber = parseInt(element.textContent.replace(/,/g, '')) || 0;
+            
+            if (currentNumber !== targetNumber) {
+                if (previousValues[elementId] !== targetNumber) {
+                    highlightElement(element, isMainCounter);
+                    previousValues[elementId] = targetNumber;
+                }
+                
+                const increment = Math.ceil(Math.abs(targetNumber - currentNumber) / 20);
+                
+                function animate() {
+                    let newValue;
+                    if (currentNumber < targetNumber) {
+                        newValue = Math.min(currentNumber + increment, targetNumber);
+                    } else {
+                        newValue = Math.max(currentNumber - increment, targetNumber);
+                    }
+                    element.textContent = newValue.toLocaleString();
+                    if (newValue !== targetNumber) {
+                        requestAnimationFrame(animate);
+                    }
+                }
+                animate();
+            }
+        }
+        
+        // Updates a static number and highlights it if it changes
+        function updateStaticNumber(elementId, targetNumber) {
+            const element = document.getElementById(elementId);
+            const currentNumber = parseFloat(element.textContent.replace(/,/g, '')) || 0;
+            
+            if (currentNumber !== targetNumber) {
+                if (previousValues[elementId] !== targetNumber) {
+                    highlightElement(element);
+                    previousValues[elementId] = targetNumber;
+                }
+                element.textContent = targetNumber.toLocaleString();
+            }
+        }
+
+        function updateCrimeBreakdown(progress) {
+            crimeBreakdown.forEach((crime, index) => {
+                const currentCount = Math.round((crime.percent / 100) * projectedCurrentYearTotal * progress);
+                const crimeCountElement = document.querySelector(`#crime-${index}`);
+                
+                if (crimeCountElement) {
+                    const displayedCount = parseInt(crimeCountElement.textContent.replace(/,/g, '')) || 0;
+                    
+                    if (displayedCount !== currentCount) {
+                        const crimeKey = `crime-${index}`;
+                        if (previousValues.crimeBreakdown[crimeKey] !== currentCount) {
+                            highlightElement(crimeCountElement);
+                            previousValues.crimeBreakdown[crimeKey] = currentCount;
+                        }
+                        crimeCountElement.textContent = currentCount.toLocaleString();
+                    }
+                }
+            });
+        }
+
+        function updateAllCounters() {
+            const now = new Date();
+            const startOfYear = new Date(currentYear, 0, 1);
+            
+            const totalDaysInYear = getDaysInYear(currentYear);
+            const millisecondsInYear = totalDaysInYear * 24 * 60 * 60 * 1000;
+            
+            const elapsed = now - startOfYear;
+            const progress = elapsed / millisecondsInYear;
+            
+            const progressPercent = Math.min(progress * 100, 100);
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+            document.getElementById('progressText').textContent = progressPercent.toFixed(2) + '% of year completed';
+            
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-IN', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            // Update all dynamic year labels
+            const yearLabels = document.querySelectorAll('.year-label');
+            yearLabels.forEach(el => el.textContent = currentYear);
+
+            const currentCount = Math.round(projectedCurrentYearTotal * progress);
+            updateNumberWithAnimation('mainCounter', currentCount, true);
+            
+            const dailyRate = Math.round(projectedCurrentYearTotal / totalDaysInYear);
+            const hourlyRate = Math.round(dailyRate / 24);
+            const minuteRate = (dailyRate / (24 * 60)).toFixed(1);
+            const daysElapsed = Math.floor(elapsed / (24 * 60 * 60 * 1000));
+            
+            updateStaticNumber('dailyRate', dailyRate);
+            updateStaticNumber('hourlyRate', hourlyRate);
+            updateStaticNumber('minuteRate', minuteRate);
+            updateStaticNumber('daysElapsed', daysElapsed);
+            
+            updateCrimeBreakdown(progress);
+        }
+
+        function setupCrimeBreakdown() {
+            const breakdownContainer = document.getElementById('crimeBreakdown');
+            
+            crimeBreakdown.forEach((crime, index) => {
+                const crimeItem = document.createElement('li');
+                crimeItem.className = 'crime-item';
+                crimeItem.innerHTML = `
+                    <div class="crime-name">${crime.name}</div>
+                    <div class="crime-count" id="crime-${index}">0</div>
+                `;
+                breakdownContainer.appendChild(crimeItem);
+                
+                // Initialize previous values for comparison
+                previousValues.crimeBreakdown[`crime-${index}`] = 0;
+            });
+        }
+
+        // Initialize the page
+        setupCrimeBreakdown();
+        updateAllCounters();
+        
+        // Update every second
+        setInterval(updateAllCounters, 1000);
+    </script>
+</body>
+</html>
